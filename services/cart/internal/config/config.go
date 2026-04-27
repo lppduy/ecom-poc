@@ -9,6 +9,7 @@ type Config struct {
 	Port          string
 	DatabaseURL   string
 	DefaultUserID string
+	RedisAddr     string
 }
 
 func Load() Config {
@@ -16,6 +17,7 @@ func Load() Config {
 		Port:          getEnv("PORT", "8082"),
 		DatabaseURL:   getEnv("DATABASE_URL", "postgres://ecom:ecom@localhost:5432/ecom?sslmode=disable"),
 		DefaultUserID: getEnv("DEFAULT_USER_ID", "u_001"),
+		RedisAddr:     getEnv("REDIS_ADDR", "localhost:6379"),
 	}
 }
 

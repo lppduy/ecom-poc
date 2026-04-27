@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -14,15 +15,13 @@ import (
 func main() {
 	cfg := config.Load()
 
-	db, err := repository.NewDB(cfg.DatabaseURL)
-	if err != nil {
-		log.Fatalf("failed to connect database: %v", err)
+	redisClient := repository.NewRedisClient(cfg.RedisAddr)
+	if err := redisClient.Ping(context.Background()).Err(); err != nil {
+		log.Fatalf("failed to connect redis: %v", err)
 	}
-	if err := repository.InitSchema(db); err != nil {
-		log.Fatalf("failed to init schema: %v", err)
-	}
+	log.Printf("connected to redis at %s", cfg.RedisAddr)
 
-	repo := repository.NewCartRepository(db)
+	repo := repository.NewRedisCartRepository(redisClient)
 	cartService := service.NewCartService(repo)
 	cartController := controller.NewCartController(cartService, cfg.DefaultUserID)
 
