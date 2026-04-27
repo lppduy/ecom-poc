@@ -13,7 +13,7 @@ func NewDB(dsn string) (*gorm.DB, error) {
 }
 
 func InitSchema(db *gorm.DB) error {
-	if err := db.AutoMigrate(&domain.Order{}, &domain.OrderItem{}); err != nil {
+	if err := db.AutoMigrate(&domain.Order{}, &domain.OrderItem{}, &domain.OutboxEvent{}); err != nil {
 		return err
 	}
 	// Backfill legacy rows if idempotency key is still empty.

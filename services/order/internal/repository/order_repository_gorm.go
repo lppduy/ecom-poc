@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/lppduy/ecom-poc/services/order/internal/domain"
 	"gorm.io/gorm"
@@ -65,7 +66,12 @@ func (r *GormOrderRepository) CreateWithItems(ctx context.Context, userID, idemp
 				return err
 			}
 		}
-		return nil
+
+		outboxEvent := domain.OutboxEvent{
+			EventType: "order.created",
+			Payload:   fmt.Sprintf(`{"orderId":%d,"userId":%q,"status":"PENDING"}`, created.ID, userID),
+		}
+		return tx.Create(&outboxEvent).Error
 	})
 	if err != nil {
 		return domain.Order{}, err
