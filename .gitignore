@@ -1,0 +1,24 @@
+# Build outputs
+bin/
+dist/
+*.out
+*.exe
+*.test
+
+# Go
+vendor/
+
+# Environment and local secrets
+.env
+.env.*
+!.env.example
+
+# Local-only notes (do not publish)
+docs-private/
+notes-private/
+*.local.md
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/
