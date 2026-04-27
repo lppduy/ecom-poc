@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/lppduy/ecom-poc/services/order/internal/api/controller"
+	"github.com/lppduy/ecom-poc/services/order/internal/api/routes"
 	"github.com/lppduy/ecom-poc/services/order/internal/client"
 	"github.com/lppduy/ecom-poc/services/order/internal/config"
 	"github.com/lppduy/ecom-poc/services/order/internal/repository"
@@ -29,7 +30,7 @@ func main() {
 	orderController := controller.NewOrderController(orderService)
 
 	router := gin.Default()
-	orderController.RegisterRoutes(router)
+	routes.RegisterOrderRoutes(router, orderController)
 
 	addr := ":" + cfg.Port
 	fmt.Printf("service started on %s\n", addr)

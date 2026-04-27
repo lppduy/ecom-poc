@@ -2,9 +2,11 @@ package controller
 
 import (
 	"errors"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
+	requestdto "github.com/lppduy/ecom-poc/services/order/internal/api/dto/request"
+	responsedto "github.com/lppduy/ecom-poc/services/order/internal/api/dto/response"
+	"github.com/lppduy/ecom-poc/services/order/internal/api/httpx"
 	"github.com/lppduy/ecom-poc/services/order/internal/domain"
 	"github.com/lppduy/ecom-poc/services/order/internal/service"
 )
@@ -17,70 +19,61 @@ func NewOrderController(service service.OrderService) *OrderController {
 	return &OrderController{service: service}
 }
 
-func (c *OrderController) RegisterRoutes(router *gin.Engine) {
-	router.GET("/health", c.health)
-	router.POST("/orders", c.createOrder)
-	router.GET("/orders/:id", c.getOrder)
+func (c *OrderController) Health(ctx *gin.Context) {
+	httpx.OK(ctx, gin.H{"status": "ok"})
 }
 
-type createOrderRequest struct {
-	UserID string `json:"userId"`
-}
-
-func (c *OrderController) health(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{"status": "ok"})
-}
-
-func (c *OrderController) createOrder(ctx *gin.Context) {
-	var req createOrderRequest
+func (c *OrderController) CreateOrder(ctx *gin.Context) {
+	var req requestdto.CreateOrderRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid json"})
+		httpx.BadRequest(ctx, "invalid json")
 		return
 	}
 	if req.UserID == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "userId is required"})
+		httpx.BadRequest(ctx, "userId is required")
 		return
 	}
 
 	idempotencyKey := ctx.GetHeader("Idempotency-Key")
 	if idempotencyKey == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Idempotency-Key header is required"})
+		httpx.BadRequest(ctx, "Idempotency-Key header is required")
 		return
 	}
 
 	created, existed, err := c.service.CreateOrder(ctx.Request.Context(), req.UserID, idempotencyKey)
 	if err != nil {
 		if errors.Is(err, domain.ErrEmptyCart) {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "cart is empty"})
+			httpx.BadRequest(ctx, "cart is empty")
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create order"})
+		httpx.InternalError(ctx, "failed to create order")
 		return
 	}
 
+	resp := responsedto.FromDomain(created)
 	if existed {
-		ctx.JSON(http.StatusOK, created)
+		httpx.OK(ctx, resp)
 		return
 	}
-	ctx.JSON(http.StatusCreated, created)
+	httpx.Created(ctx, resp)
 }
 
-func (c *OrderController) getOrder(ctx *gin.Context) {
+func (c *OrderController) GetOrder(ctx *gin.Context) {
 	id := ctx.Param("id")
 	if id == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "order id is required"})
+		httpx.BadRequest(ctx, "order id is required")
 		return
 	}
 
 	found, ok, err := c.service.GetOrder(id)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to query order"})
+		httpx.InternalError(ctx, "failed to query order")
 		return
 	}
 	if !ok {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "order not found"})
+		httpx.NotFound(ctx, "order not found")
 		return
 	}
 
-	ctx.JSON(http.StatusOK, found)
+	httpx.OK(ctx, responsedto.FromDomain(found))
 }
