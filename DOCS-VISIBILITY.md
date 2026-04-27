@@ -1,3 +1,71 @@
+# Documentation Visibility Policy
+
+Use this policy to keep the public repository clean while protecting local/internal notes.
+
+## Public (safe to push)
+
+- `README.md`
+- `docs/architecture.md`
+- `docs/sequence-checkout.md`
+- `docs/tradeoffs.md`
+- `docs/runbook.md`
+- Source code under `services/`, `infra/`, `scripts/`
+
+## Local only (do not push)
+
+- Learning journals and daily progress logs
+- Team-only notes and planning drafts
+- Secrets, private endpoints, credentials, internal URLs
+- Any personal data (PII) or production debug dumps
+
+## Local-only locations
+
+- `docs-private/`
+- `notes-private/`
+- `*.local.md`
+
+All locations above are ignored by `.gitignore`.
+
+## Pre-push checklist
+
+- [ ] No `.env` or secret file included
+- [ ] No tokens/passwords in code or docs
+- [ ] No private internal URLs
+- [ ] No customer or personal data
+# Documentation Visibility Policy
+
+Use this policy to keep the public repository clean while protecting local/internal notes.
+
+## Public (safe to push)
+
+- `README.md`
+- `docs/architecture.md`
+- `docs/sequence-checkout.md`
+- `docs/tradeoffs.md`
+- `docs/runbook.md`
+- Source code under `services/`, `infra/`, `scripts/`
+
+## Local only (do not push)
+
+- Learning journals and daily progress logs
+- Team-only notes and planning drafts
+- Secrets, private endpoints, credentials, internal URLs
+- Any personal data (PII) or production debug dumps
+
+## Local-only locations
+
+- `docs-private/`
+- `notes-private/`
+- `*.local.md`
+
+All locations above are ignored by `.gitignore`.
+
+## Pre-push checklist
+
+- [ ] No `.env` or secret file included
+- [ ] No tokens/passwords in code or docs
+- [ ] No private internal URLs
+- [ ] No customer or personal data
 # Docs Visibility Policy
 
 Tai lieu nay giup ban quyet dinh cai gi duoc push public, cai gi nen giu local.
