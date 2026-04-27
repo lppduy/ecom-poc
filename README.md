@@ -34,9 +34,15 @@ docker compose up -d
 2. Run services (separate terminals):
 
 ```bash
-cd services/catalog && PORT=8081 go run ./cmd/main.go
-cd services/cart && PORT=8082 go run ./cmd/main.go
-cd services/order && PORT=8083 go run ./cmd/main.go
+cd services/catalog && PORT=8081 go run ./cmd/api/main.go
+cd services/cart && PORT=8082 go run ./cmd/api/main.go
+cd services/order && PORT=8083 go run ./cmd/api/main.go
+```
+
+Or run all with autoreload:
+
+```bash
+./scripts/dev-air.sh
 ```
 
 3. Test endpoints:

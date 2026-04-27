@@ -1,0 +1,20 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "go build -o ./tmp/main ./cmd/api/main.go"
+entrypoint = "./tmp/main"
+full_bin = "PORT=8083 DATABASE_URL=postgres://ecom:ecom@localhost:5432/ecom?sslmode=disable CART_BASE_URL=http://localhost:8082 ./tmp/main"
+include_ext = ["go"]
+exclude_dir = ["tmp"]
+delay = 300
+stop_on_error = true
+
+[color]
+main = "green"
+watcher = "cyan"
+build = "yellow"
+runner = "magenta"
+
+[screen]
+clear_on_rebuild = true

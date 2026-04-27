@@ -159,3 +159,4 @@ Tai lieu nay giup ban quyet dinh cai gi duoc push public, cai gi nen giu local.
 - [ ] Khong co token/API key trong code/doc
 - [ ] Khong co URL private cua he thong that
 - [ ] Khong co thong tin nhan than/khach hang that (PII)
+`

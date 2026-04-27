@@ -4,6 +4,7 @@ dist/
 *.out
 *.exe
 *.test
+**/tmp/
 
 # Go
 vendor/
