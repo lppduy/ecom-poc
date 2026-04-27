@@ -1,5 +1,9 @@
 package domain
 
+import "errors"
+
+var ErrEmptyCart = errors.New("cart is empty")
+
 type Order struct {
 	ID             int64  `json:"id" gorm:"primaryKey"`
 	UserID         string `json:"userId" gorm:"type:text;not null"`

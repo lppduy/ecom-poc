@@ -11,10 +11,10 @@ var ErrInvalidQuantity = errors.New("quantity must be greater than 0")
 var ErrMissingProductID = errors.New("productId is required")
 
 type CartService struct {
-	repo *repository.CartRepository
+	repo repository.CartRepository
 }
 
-func NewCartService(repo *repository.CartRepository) *CartService {
+func NewCartService(repo repository.CartRepository) *CartService {
 	return &CartService{repo: repo}
 }
 

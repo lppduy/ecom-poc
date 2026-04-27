@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lppduy/ecom-poc/services/order/internal/domain"
 	"github.com/lppduy/ecom-poc/services/order/internal/service"
 )
 
@@ -49,7 +50,7 @@ func (c *OrderController) createOrder(ctx *gin.Context) {
 
 	created, existed, err := c.service.CreateOrder(ctx.Request.Context(), req.UserID, idempotencyKey)
 	if err != nil {
-		if errors.Is(err, service.ErrEmptyCart) {
+		if errors.Is(err, domain.ErrEmptyCart) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "cart is empty"})
 			return
 		}
