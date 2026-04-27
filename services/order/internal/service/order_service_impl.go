@@ -29,6 +29,9 @@ func (s *DefaultOrderService) CreateOrder(ctx context.Context, userID, idempoten
 	if err != nil {
 		return domain.Order{}, false, err
 	}
+	if len(cartItems) == 0 {
+		return domain.Order{}, false, domain.ErrEmptyCart
+	}
 
 	created, err := s.repo.CreateWithItems(ctx, userID, idempotencyKey, cartItems)
 	if err != nil {
