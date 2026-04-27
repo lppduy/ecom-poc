@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/lppduy/ecom-poc/services/order/internal/client"
 	"github.com/lppduy/ecom-poc/services/order/internal/domain"
@@ -10,12 +11,21 @@ import (
 )
 
 type DefaultOrderService struct {
-	repo       repository.OrderRepository
-	cartClient client.CartClient
+	repo            repository.OrderRepository
+	cartClient      client.CartClient
+	inventoryClient client.InventoryClient
 }
 
-func NewOrderService(repo repository.OrderRepository, cartClient client.CartClient) *DefaultOrderService {
-	return &DefaultOrderService{repo: repo, cartClient: cartClient}
+func NewOrderService(
+	repo repository.OrderRepository,
+	cartClient client.CartClient,
+	inventoryClient client.InventoryClient,
+) *DefaultOrderService {
+	return &DefaultOrderService{
+		repo:            repo,
+		cartClient:      cartClient,
+		inventoryClient: inventoryClient,
+	}
 }
 
 func (s *DefaultOrderService) CreateOrder(ctx context.Context, userID, idempotencyKey string) (domain.Order, bool, error) {
@@ -44,6 +54,12 @@ func (s *DefaultOrderService) CreateOrder(ctx context.Context, userID, idempoten
 		return domain.Order{}, false, err
 	}
 
+	// Reserve stock — if this fails, transition the order to FAILED immediately.
+	if err := s.inventoryClient.Reserve(created.ID, cartItems); err != nil {
+		_ = s.repo.UpdateStatus(created.ID, domain.StatusFailed)
+		return domain.Order{}, false, fmt.Errorf("stock reservation failed: %w", err)
+	}
+
 	_ = s.cartClient.ClearCart(userID)
 	return created, false, nil
 }
@@ -53,11 +69,21 @@ func (s *DefaultOrderService) GetOrder(id string) (domain.Order, bool, error) {
 }
 
 func (s *DefaultOrderService) ConfirmOrder(id string) (domain.Order, error) {
-	return s.transitionOrder(id, domain.StatusConfirmed)
+	order, err := s.transitionOrder(id, domain.StatusConfirmed)
+	if err != nil {
+		return domain.Order{}, err
+	}
+	_ = s.inventoryClient.Confirm(order.ID)
+	return order, nil
 }
 
 func (s *DefaultOrderService) FailOrder(id string) (domain.Order, error) {
-	return s.transitionOrder(id, domain.StatusFailed)
+	order, err := s.transitionOrder(id, domain.StatusFailed)
+	if err != nil {
+		return domain.Order{}, err
+	}
+	_ = s.inventoryClient.Release(order.ID)
+	return order, nil
 }
 
 func (s *DefaultOrderService) transitionOrder(id, newStatus string) (domain.Order, error) {

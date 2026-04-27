@@ -15,6 +15,7 @@ cleanup() {
   if [[ -n "${CATALOG_PID:-}" ]]; then kill "$CATALOG_PID" 2>/dev/null || true; fi
   if [[ -n "${CART_PID:-}" ]]; then kill "$CART_PID" 2>/dev/null || true; fi
   if [[ -n "${ORDER_PID:-}" ]]; then kill "$ORDER_PID" 2>/dev/null || true; fi
+  if [[ -n "${INVENTORY_PID:-}" ]]; then kill "$INVENTORY_PID" 2>/dev/null || true; fi
 }
 trap cleanup INT TERM EXIT
 
@@ -36,10 +37,17 @@ CART_PID=$!
 ) &
 ORDER_PID=$!
 
+(
+  cd "$ROOT_DIR/services/inventory"
+  "$AIR_BIN"
+) &
+INVENTORY_PID=$!
+
 echo "Air dev servers running:"
-echo "  catalog: http://localhost:8081"
-echo "  cart:    http://localhost:8082"
-echo "  order:   http://localhost:8083"
+echo "  catalog:   http://localhost:8081"
+echo "  cart:      http://localhost:8082"
+echo "  order:     http://localhost:8083"
+echo "  inventory: http://localhost:8084"
 echo ""
 echo "Press Ctrl+C to stop all."
 

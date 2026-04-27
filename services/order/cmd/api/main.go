@@ -36,7 +36,8 @@ func main() {
 
 	repo := repository.NewOrderRepository(db)
 	cartClient := client.NewCartHTTPClient(cfg.CartBaseURL)
-	orderService := service.NewOrderService(repo, cartClient)
+	inventoryClient := client.NewInventoryHTTPClient(cfg.InventoryBaseURL)
+	orderService := service.NewOrderService(repo, cartClient, inventoryClient)
 	orderController := controller.NewOrderController(orderService)
 
 	router := gin.Default()
