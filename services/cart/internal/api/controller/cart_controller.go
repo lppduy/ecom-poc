@@ -10,11 +10,11 @@ import (
 )
 
 type CartController struct {
-	service       *service.CartService
+	service       service.CartService
 	defaultUserID string
 }
 
-func NewCartController(service *service.CartService, defaultUserID string) *CartController {
+func NewCartController(service service.CartService, defaultUserID string) *CartController {
 	return &CartController{service: service, defaultUserID: defaultUserID}
 }
 
