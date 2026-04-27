@@ -14,8 +14,7 @@ vendor/
 !.env.example
 
 # Local-only notes (do not publish)
-docs-private/
-notes-private/
+local/
 *.local.md
 
 # IDE / OS

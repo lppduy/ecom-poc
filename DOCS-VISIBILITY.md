@@ -1,5 +1,63 @@
 # Documentation Visibility Policy
 
+Keep this repository public-friendly while preserving private working notes locally.
+
+## Public (safe to push)
+
+- `README.md`
+- `docs/`
+- `services/`
+- `infra/`
+- `scripts/`
+
+## Local only (do not push)
+
+- `local/`
+- `*.local.md`
+- `.env*` (except `.env.example`)
+- Any file containing secrets, private URLs, PII, or production dumps
+
+## Pre-push checklist
+
+- [ ] No `.env` or secret files are staged
+- [ ] No tokens/passwords in code or docs
+- [ ] No private internal URLs
+- [ ] No personal/customer data
+# Documentation Visibility Policy
+
+Use this policy to keep the public repository clean while protecting local-only notes.
+
+## Public (safe to push)
+
+- `README.md`
+- `docs/architecture.md`
+- `docs/sequence-checkout.md`
+- `docs/tradeoffs.md`
+- `docs/runbook.md`
+- Source code under `services/`, `infra/`, `scripts/`
+
+## Local only (do not push)
+
+- Learning journals and daily progress logs
+- Team-only planning drafts
+- Secrets, credentials, internal-only URLs
+- Any personal or production data dumps
+
+## Local-only location
+
+- `local/`
+- `*.local.md`
+
+All local-only paths above are ignored by `.gitignore`.
+
+## Pre-push checklist
+
+- [ ] No `.env` or secret files are staged
+- [ ] No tokens/passwords in code or docs
+- [ ] No private internal URLs
+- [ ] No customer or personal data
+# Documentation Visibility Policy
+
 Use this policy to keep the public repository clean while protecting local/internal notes.
 
 ## Public (safe to push)

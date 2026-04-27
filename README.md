@@ -16,7 +16,7 @@ This repository is a hands-on learning project for building an end-to-end e-comm
 ```txt
 ecom-poc/
   docs/                  public technical docs
-  docs-private/          local-only notes (gitignored)
+  local/                 local-only notes (gitignored)
   infra/                 docker compose and infra configs
   services/              Go microservice skeletons
   scripts/               helper scripts
