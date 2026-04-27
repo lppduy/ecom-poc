@@ -26,6 +26,7 @@ func (c *CartController) RegisterRoutes(router *gin.Engine) {
 }
 
 type addCartItemRequest struct {
+	UserID    string `json:"userId"`
 	ProductID string `json:"productId"`
 	Quantity  int    `json:"quantity"`
 }
@@ -41,7 +42,10 @@ func (c *CartController) addCartItem(ctx *gin.Context) {
 		return
 	}
 
-	userID := c.resolveUserID(ctx)
+	userID := req.UserID
+	if userID == "" {
+		userID = c.resolveUserID(ctx)
+	}
 	if err := c.service.AddItem(userID, req.ProductID, req.Quantity); err != nil {
 		if errors.Is(err, service.ErrMissingProductID) || errors.Is(err, service.ErrInvalidQuantity) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

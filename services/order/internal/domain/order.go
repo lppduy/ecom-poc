@@ -2,7 +2,35 @@ package domain
 
 import "errors"
 
-var ErrEmptyCart = errors.New("cart is empty")
+var (
+	ErrEmptyCart          = errors.New("cart is empty")
+	ErrOrderNotFound      = errors.New("order not found")
+	ErrInvalidTransition  = errors.New("invalid status transition")
+)
+
+const (
+	StatusPending   = "PENDING"
+	StatusConfirmed = "CONFIRMED"
+	StatusFailed    = "FAILED"
+)
+
+// AllowedTransitions defines valid state machine transitions.
+var AllowedTransitions = map[string][]string{
+	StatusPending: {StatusConfirmed, StatusFailed},
+}
+
+func CanTransition(from, to string) bool {
+	allowed, ok := AllowedTransitions[from]
+	if !ok {
+		return false
+	}
+	for _, s := range allowed {
+		if s == to {
+			return true
+		}
+	}
+	return false
+}
 
 type Order struct {
 	ID             int64  `json:"id" gorm:"primaryKey"`

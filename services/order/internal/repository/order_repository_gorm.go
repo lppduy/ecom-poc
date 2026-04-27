@@ -72,3 +72,14 @@ func (r *GormOrderRepository) CreateWithItems(ctx context.Context, userID, idemp
 	}
 	return created, nil
 }
+
+func (r *GormOrderRepository) UpdateStatus(id int64, newStatus string) error {
+	result := r.db.Model(&domain.Order{}).Where("id = ?", id).Update("status", newStatus)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("order not found")
+	}
+	return nil
+}

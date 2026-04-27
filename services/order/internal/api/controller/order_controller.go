@@ -77,3 +77,34 @@ func (c *OrderController) GetOrder(ctx *gin.Context) {
 
 	httpx.OK(ctx, responsedto.FromDomain(found))
 }
+
+func (c *OrderController) ConfirmOrder(ctx *gin.Context) {
+	c.handleTransition(ctx, c.service.ConfirmOrder)
+}
+
+func (c *OrderController) FailOrder(ctx *gin.Context) {
+	c.handleTransition(ctx, c.service.FailOrder)
+}
+
+func (c *OrderController) handleTransition(ctx *gin.Context, fn func(string) (domain.Order, error)) {
+	id := ctx.Param("id")
+	if id == "" {
+		httpx.BadRequest(ctx, "order id is required")
+		return
+	}
+
+	updated, err := fn(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, domain.ErrOrderNotFound):
+			httpx.NotFound(ctx, "order not found")
+		case errors.Is(err, domain.ErrInvalidTransition):
+			httpx.BadRequest(ctx, "invalid status transition")
+		default:
+			httpx.InternalError(ctx, "failed to update order")
+		}
+		return
+	}
+
+	httpx.OK(ctx, responsedto.FromDomain(updated))
+}

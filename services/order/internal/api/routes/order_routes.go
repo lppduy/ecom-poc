@@ -9,4 +9,6 @@ func RegisterOrderRoutes(router *gin.Engine, orderController *controller.OrderCo
 	router.GET("/health", orderController.Health)
 	router.POST("/orders", orderController.CreateOrder)
 	router.GET("/orders/:id", orderController.GetOrder)
+	router.PATCH("/orders/:id/confirm", orderController.ConfirmOrder)
+	router.PATCH("/orders/:id/fail", orderController.FailOrder)
 }
