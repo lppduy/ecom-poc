@@ -11,7 +11,7 @@ func NewPostgresDB(dsn string) (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := db.AutoMigrate(&domain.Payment{}); err != nil {
+	if err := db.AutoMigrate(&domain.Payment{}, &domain.PaymentOutboxEvent{}); err != nil {
 		return nil, err
 	}
 	return db, nil

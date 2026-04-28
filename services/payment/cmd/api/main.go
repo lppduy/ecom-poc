@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"strings"
 
@@ -25,8 +26,11 @@ func main() {
 	publisher := event.NewKafkaPublisher(brokers)
 	defer publisher.Close()
 
+	outboxRepo := repository.NewPaymentOutboxRepository(db)
+	event.StartRelay(context.Background(), outboxRepo, publisher)
+
 	paymentRepo := repository.NewGormPaymentRepository(db)
-	paymentSvc := service.NewPaymentService(paymentRepo, publisher)
+	paymentSvc := service.NewPaymentService(paymentRepo)
 	paymentCtrl := controller.NewPaymentController(paymentSvc)
 
 	r := gin.Default()

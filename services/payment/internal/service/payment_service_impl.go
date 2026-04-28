@@ -1,9 +1,8 @@
 package service
 
 import (
-	"context"
+	"encoding/json"
 	"fmt"
-	"log"
 
 	"github.com/lppduy/ecom-poc/services/payment/internal/domain"
 	"github.com/lppduy/ecom-poc/services/payment/internal/event"
@@ -11,12 +10,11 @@ import (
 )
 
 type DefaultPaymentService struct {
-	repo      repository.PaymentRepository
-	publisher *event.KafkaPublisher
+	repo repository.PaymentRepository
 }
 
-func NewPaymentService(repo repository.PaymentRepository, publisher *event.KafkaPublisher) *DefaultPaymentService {
-	return &DefaultPaymentService{repo: repo, publisher: publisher}
+func NewPaymentService(repo repository.PaymentRepository) *DefaultPaymentService {
+	return &DefaultPaymentService{repo: repo}
 }
 
 func (s *DefaultPaymentService) CreatePayment(orderID string, amount float64) (domain.Payment, error) {
@@ -62,23 +60,22 @@ func (s *DefaultPaymentService) Callback(id, result string) (domain.Payment, err
 		return domain.Payment{}, fmt.Errorf("invalid result: must be 'success' or 'fail'")
 	}
 
-	if err := s.repo.UpdateStatus(id, newStatus); err != nil {
+	// Build the outbox payload before writing to DB
+	payload, err := json.Marshal(event.PaymentEvent{
+		PaymentID: p.ID,
+		OrderID:   p.OrderID,
+		Status:    eventStatus,
+	})
+	if err != nil {
+		return domain.Payment{}, fmt.Errorf("marshal event: %w", err)
+	}
+
+	// Atomic: UPDATE payment status + INSERT outbox event in one transaction.
+	// The relay goroutine will read the outbox and publish to Kafka.
+	if err := s.repo.UpdateStatusWithOutbox(id, newStatus, string(payload)); err != nil {
 		return domain.Payment{}, err
 	}
+
 	p.Status = newStatus
-
-	// Publish payment event to Kafka; order service consumes and confirms/fails the order.
-	go func() {
-		if pubErr := s.publisher.PublishPaymentEvent(context.Background(), event.PaymentEvent{
-			PaymentID: p.ID,
-			OrderID:   p.OrderID,
-			Status:    eventStatus,
-		}); pubErr != nil {
-			log.Printf("[payment] warn: failed to publish event for order %s: %v", p.OrderID, pubErr)
-		} else {
-			log.Printf("[payment] published %s event for order %s", eventStatus, p.OrderID)
-		}
-	}()
-
 	return p, nil
 }

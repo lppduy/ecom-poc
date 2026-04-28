@@ -44,3 +44,17 @@ func (r *GormPaymentRepository) FindByOrderID(orderID string) (domain.Payment, e
 func (r *GormPaymentRepository) UpdateStatus(id string, status domain.Status) error {
 	return r.db.Model(&domain.Payment{}).Where("id = ?", id).Update("status", status).Error
 }
+
+// UpdateStatusWithOutbox atomically updates payment status and inserts an outbox event
+// in the same DB transaction — guarantees the event is never lost even on crash.
+func (r *GormPaymentRepository) UpdateStatusWithOutbox(id string, status domain.Status, outboxPayload string) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&domain.Payment{}).Where("id = ?", id).Update("status", status).Error; err != nil {
+			return err
+		}
+		return tx.Create(&domain.PaymentOutboxEvent{
+			EventType: "payment.callback",
+			Payload:   outboxPayload,
+		}).Error
+	})
+}

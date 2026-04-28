@@ -7,4 +7,5 @@ type PaymentRepository interface {
 	FindByID(id string) (domain.Payment, error)
 	FindByOrderID(orderID string) (domain.Payment, error)
 	UpdateStatus(id string, status domain.Status) error
+	UpdateStatusWithOutbox(id string, status domain.Status, outboxPayload string) error
 }
