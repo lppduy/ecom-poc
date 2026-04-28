@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	"github.com/lppduy/ecom-poc/services/order/internal/api/controller"
 	"github.com/lppduy/ecom-poc/services/order/internal/api/routes"
 	"github.com/lppduy/ecom-poc/services/order/internal/client"
@@ -38,10 +39,15 @@ func main() {
 	cartClient := client.NewCartHTTPClient(cfg.CartBaseURL)
 	inventoryClient := client.NewInventoryHTTPClient(cfg.InventoryBaseURL)
 	orderService := service.NewOrderService(repo, cartClient, inventoryClient)
+	rdb := redis.NewClient(&redis.Options{Addr: cfg.RedisAddr})
+	if err := rdb.Ping(context.Background()).Err(); err != nil {
+		log.Fatalf("order: connect redis: %v", err)
+	}
+
 	orderController := controller.NewOrderController(orderService)
 
 	router := gin.Default()
-	routes.RegisterOrderRoutes(router, orderController, cfg.JWTSecret)
+	routes.RegisterOrderRoutes(router, orderController, cfg.JWTSecret, rdb)
 
 	addr := ":" + cfg.Port
 	fmt.Printf("service started on %s\n", addr)

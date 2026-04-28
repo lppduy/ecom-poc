@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	"github.com/lppduy/ecom-poc/services/auth/internal/api/controller"
 	"github.com/lppduy/ecom-poc/services/auth/internal/api/routes"
 	"github.com/lppduy/ecom-poc/services/auth/internal/config"
@@ -19,6 +21,11 @@ func main() {
 		log.Fatalf("auth: connect postgres: %v", err)
 	}
 
+	rdb := redis.NewClient(&redis.Options{Addr: cfg.RedisAddr})
+	if err := rdb.Ping(context.Background()).Err(); err != nil {
+		log.Fatalf("auth: connect redis: %v", err)
+	}
+
 	userRepo := repository.NewGormUserRepository(db)
 	authSvc := service.NewAuthService(userRepo, cfg.JWTSecret)
 	authCtrl := controller.NewAuthController(authSvc, cfg.JWTSecret)
@@ -27,7 +34,7 @@ func main() {
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
-	routes.Register(r, authCtrl, cfg.JWTSecret)
+	routes.Register(r, authCtrl, cfg.JWTSecret, rdb)
 
 	log.Printf("auth service listening on :%s", cfg.Port)
 	if err := r.Run(":" + cfg.Port); err != nil {

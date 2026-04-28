@@ -8,12 +8,14 @@ import (
 type Config struct {
 	Port        string
 	DatabaseURL string
+	RedisAddr   string
 }
 
 func Load() Config {
 	return Config{
 		Port:        getEnv("PORT", "8084"),
 		DatabaseURL: getEnv("DATABASE_URL", "postgres://ecom:ecom@localhost:5432/ecom?sslmode=disable"),
+		RedisAddr:   getEnv("REDIS_ADDR", "localhost:6379"),
 	}
 }
 

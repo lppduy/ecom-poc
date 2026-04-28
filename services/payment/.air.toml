@@ -4,7 +4,7 @@ tmp_dir = "tmp"
 [build]
 cmd = "go build -o ./tmp/main ./cmd/api/main.go"
 entrypoint = "./tmp/main"
-full_bin = "PORT=8087 DATABASE_URL=postgres://ecom:ecom@localhost:5432/ecom?sslmode=disable JWT_SECRET=supersecret-change-in-prod REDIS_ADDR=localhost:6379 ./tmp/main"
+full_bin = "PORT=8086 DATABASE_URL=postgres://ecom:ecom@localhost:5432/ecom?sslmode=disable ORDER_BASE_URL=http://localhost:8083 JWT_SECRET=supersecret-change-in-prod ./tmp/main"
 include_ext = ["go"]
 exclude_dir = ["tmp"]
 delay = 300

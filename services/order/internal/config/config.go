@@ -12,6 +12,7 @@ type Config struct {
 	InventoryBaseURL string
 	KafkaBrokers     string
 	JWTSecret        string
+	RedisAddr        string
 }
 
 func Load() Config {
@@ -22,6 +23,7 @@ func Load() Config {
 		InventoryBaseURL: getEnv("INVENTORY_BASE_URL", "http://localhost:8084"),
 		KafkaBrokers:     getEnv("KAFKA_BROKERS", "localhost:9092"),
 		JWTSecret:        getEnv("JWT_SECRET", "supersecret-change-in-prod"),
+		RedisAddr:        getEnv("REDIS_ADDR", "localhost:6379"),
 	}
 }
 

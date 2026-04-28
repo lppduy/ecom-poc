@@ -11,4 +11,9 @@ func Register(router *gin.Engine, ctrl *controller.InventoryController) {
 	router.POST("/inventory/reserve", ctrl.Reserve)
 	router.POST("/inventory/release", ctrl.Release)
 	router.POST("/inventory/confirm", ctrl.Confirm)
+
+	// Flash sale routes (high-concurrency path via Redis atomic ops)
+	router.POST("/inventory/flash-sale/init", ctrl.FlashSaleInit)
+	router.POST("/inventory/flash-sale/reserve", ctrl.FlashSaleReserve)
+	router.GET("/inventory/flash-sale/stock/:productId", ctrl.FlashSaleStock)
 }

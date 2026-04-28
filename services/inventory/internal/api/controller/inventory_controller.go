@@ -7,15 +7,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/lppduy/ecom-poc/services/inventory/internal/api/httpx"
 	"github.com/lppduy/ecom-poc/services/inventory/internal/domain"
+	"github.com/lppduy/ecom-poc/services/inventory/internal/repository"
 	"github.com/lppduy/ecom-poc/services/inventory/internal/service"
 )
 
 type InventoryController struct {
-	service service.InventoryService
+	service   service.InventoryService
+	flashSale *repository.FlashSaleRepository
 }
 
-func NewInventoryController(svc service.InventoryService) *InventoryController {
-	return &InventoryController{service: svc}
+func NewInventoryController(svc service.InventoryService, flashSale *repository.FlashSaleRepository) *InventoryController {
+	return &InventoryController{service: svc, flashSale: flashSale}
 }
 
 type reserveRequest struct {
@@ -90,6 +92,63 @@ func (ctrl *InventoryController) Confirm(c *gin.Context) {
 	}
 
 	httpx.OK(c, gin.H{"message": "stock confirmed"})
+}
+
+// --- Flash Sale endpoints ---
+
+type flashInitRequest struct {
+	ProductID string `json:"productId" binding:"required"`
+	Quantity  int64  `json:"quantity"  binding:"required,min=1"`
+}
+
+type flashReserveRequest struct {
+	ProductID string `json:"productId" binding:"required"`
+	Quantity  int64  `json:"quantity"  binding:"required,min=1"`
+}
+
+// FlashSaleInit seeds flash sale stock in Redis (admin / setup endpoint).
+func (ctrl *InventoryController) FlashSaleInit(c *gin.Context) {
+	var req flashInitRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		httpx.BadRequest(c, err.Error())
+		return
+	}
+	if err := ctrl.flashSale.ForceInit(c.Request.Context(), req.ProductID, req.Quantity); err != nil {
+		httpx.InternalError(c, "failed to init flash sale")
+		return
+	}
+	httpx.OK(c, gin.H{"productId": req.ProductID, "quantity": req.Quantity, "message": "flash sale initialised"})
+}
+
+// FlashSaleReserve atomically decrements flash sale stock.
+// Uses Redis DECRBY - no DB lock needed, handles thousands of concurrent requests.
+func (ctrl *InventoryController) FlashSaleReserve(c *gin.Context) {
+	var req flashReserveRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		httpx.BadRequest(c, err.Error())
+		return
+	}
+	if err := ctrl.flashSale.Reserve(c.Request.Context(), req.ProductID, req.Quantity); err != nil {
+		if errors.Is(err, repository.ErrSoldOut) {
+			c.JSON(http.StatusGone, gin.H{"error": "sold out"})
+			return
+		}
+		httpx.BadRequest(c, err.Error())
+		return
+	}
+	remaining, _ := ctrl.flashSale.Stock(c.Request.Context(), req.ProductID)
+	httpx.OK(c, gin.H{"message": "reserved", "remaining": remaining})
+}
+
+// FlashSaleStock returns current flash sale stock.
+func (ctrl *InventoryController) FlashSaleStock(c *gin.Context) {
+	productID := c.Param("productId")
+	stock, err := ctrl.flashSale.Stock(c.Request.Context(), productID)
+	if err != nil {
+		httpx.NotFound(c, err.Error())
+		return
+	}
+	httpx.OK(c, gin.H{"productId": productID, "flashSaleStock": stock})
 }
 
 func (ctrl *InventoryController) GetStock(c *gin.Context) {

@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	"github.com/lppduy/ecom-poc/services/inventory/internal/api/controller"
 	"github.com/lppduy/ecom-poc/services/inventory/internal/api/routes"
 	"github.com/lppduy/ecom-poc/services/inventory/internal/config"
@@ -28,8 +30,14 @@ func main() {
 		log.Fatalf("failed to seed stock: %v", err)
 	}
 
+	redisClient := redis.NewClient(&redis.Options{Addr: cfg.RedisAddr})
+	if err := redisClient.Ping(context.Background()).Err(); err != nil {
+		log.Fatalf("failed to connect redis: %v", err)
+	}
+	flashSaleRepo := repository.NewFlashSaleRepository(redisClient)
+
 	inventoryService := service.NewInventoryService(repo)
-	inventoryController := controller.NewInventoryController(inventoryService)
+	inventoryController := controller.NewInventoryController(inventoryService, flashSaleRepo)
 
 	router := gin.Default()
 	routes.Register(router, inventoryController)
