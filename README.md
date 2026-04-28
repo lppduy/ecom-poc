@@ -33,7 +33,7 @@ E-commerce backend POC: Go, Gin, JWT auth, Kafka, Redis, Postgres, Elasticsearch
 ```
 PostgreSQL    transactional data (users, orders, inventory, payments)
 Redis         cart sessions + flash sale counter + rate limiter
-Kafka         async event bus (order.events topic)
+Kafka         async event bus (order.events, payment.events topics)
 Kafka UI      http://localhost:8088
 Elasticsearch product search index
 ```
@@ -57,10 +57,10 @@ Or run individually:
 
 ```bash
 cd services/auth      && PORT=8086 go run ./cmd/api/main.go
-cd services/catalog   && PORT=8081 go run ./cmd/api/main.go
+cd services/catalog   && PORT=8081 GRPC_PORT=9081 go run ./cmd/api/main.go
 cd services/cart      && PORT=8082 go run ./cmd/api/main.go
 cd services/order     && PORT=8083 go run ./cmd/api/main.go
-cd services/inventory && PORT=8084 go run ./cmd/api/main.go
+cd services/inventory && PORT=8084 GRPC_PORT=9084 go run ./cmd/api/main.go
 cd services/search    && PORT=8085 go run ./cmd/api/main.go
 cd services/payment   && PORT=8087 go run ./cmd/api/main.go
 ```
@@ -94,8 +94,10 @@ PATCH /orders/:id/fail     PENDING -> FAILED, release reserved stock
 ### Payment flow
 
 ```
-POST /payments         create payment record (PENDING)
-POST /payments/:id/callback  mock webhook: SUCCESS -> confirm order / FAILED -> fail order
+POST /payments                   create payment record (PENDING)
+POST /payments/:id/callback      mock webhook: updates status + writes outbox event
+                                 Kafka relay publishes to payment.events
+                                 order consumer drives PENDING -> CONFIRMED / FAILED
 ```
 
 ### Flash sale flow
