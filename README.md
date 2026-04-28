@@ -1,4 +1,4 @@
-# ecom-poc
+# Ecom PoC
 
 E-commerce backend POC: Go, Gin, JWT auth, Kafka, Redis, Postgres, Elasticsearch, gRPC.
 
