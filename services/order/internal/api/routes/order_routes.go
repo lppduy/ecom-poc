@@ -21,11 +21,4 @@ func RegisterOrderRoutes(router *gin.Engine, orderController *controller.OrderCo
 		protected.POST("/orders", orderLimiter, orderController.CreateOrder)
 		protected.GET("/orders/:id", orderController.GetOrder)
 	}
-
-	// Internal routes for service-to-service calls (no JWT required)
-	internal := router.Group("/internal")
-	{
-		internal.PATCH("/orders/:id/confirm", orderController.ConfirmOrder)
-		internal.PATCH("/orders/:id/fail", orderController.FailOrder)
-	}
 }
