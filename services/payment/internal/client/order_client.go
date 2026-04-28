@@ -1,3 +1,13 @@
+// Package client previously held an OrderHTTPClient that called
+// /internal/orders/:id/confirm|fail directly after payment callback.
+//
+// This has been replaced by Kafka event publishing (see event/kafka_publisher.go).
+// Payment service publishes to "payment.events" topic; order service consumes
+// and drives the state machine asynchronously.
+//
+// This file is kept as a reference for the synchronous HTTP alternative.
+// To swap back: instantiate OrderHTTPClient, pass to NewPaymentService instead of KafkaPublisher.
+
 package client
 
 import (

@@ -2,12 +2,13 @@ package main
 
 import (
 	"log"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lppduy/ecom-poc/services/payment/internal/api/controller"
 	"github.com/lppduy/ecom-poc/services/payment/internal/api/routes"
-	"github.com/lppduy/ecom-poc/services/payment/internal/client"
 	"github.com/lppduy/ecom-poc/services/payment/internal/config"
+	"github.com/lppduy/ecom-poc/services/payment/internal/event"
 	"github.com/lppduy/ecom-poc/services/payment/internal/repository"
 	"github.com/lppduy/ecom-poc/services/payment/internal/service"
 )
@@ -20,9 +21,12 @@ func main() {
 		log.Fatalf("payment: connect postgres: %v", err)
 	}
 
+	brokers := strings.Split(cfg.KafkaBrokers, ",")
+	publisher := event.NewKafkaPublisher(brokers)
+	defer publisher.Close()
+
 	paymentRepo := repository.NewGormPaymentRepository(db)
-	orderClient := client.NewOrderHTTPClient(cfg.OrderBaseURL)
-	paymentSvc := service.NewPaymentService(paymentRepo, orderClient)
+	paymentSvc := service.NewPaymentService(paymentRepo, publisher)
 	paymentCtrl := controller.NewPaymentController(paymentSvc)
 
 	r := gin.Default()

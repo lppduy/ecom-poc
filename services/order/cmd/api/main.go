@@ -43,6 +43,9 @@ func main() {
 	}
 	defer inventoryClient.Close()
 	orderService := service.NewOrderService(repo, cartClient, inventoryClient)
+
+	// Consume payment.events and drive order state machine asynchronously
+	event.StartPaymentConsumer(context.Background(), brokers, orderService)
 	rdb := redis.NewClient(&redis.Options{Addr: cfg.RedisAddr})
 	if err := rdb.Ping(context.Background()).Err(); err != nil {
 		log.Fatalf("order: connect redis: %v", err)
