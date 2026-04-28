@@ -1,6 +1,6 @@
-# ecom-poc (Go)
+# ecom-poc
 
-Hands-on e-commerce system built with Go, focused on production-minded patterns: outbox, state machine, inter-service HTTP, Redis, Kafka, Elasticsearch.
+E-commerce backend POC: Go, Gin, Kafka outbox, Redis, Postgres, Elasticsearch.
 
 ## Services
 
