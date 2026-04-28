@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/gin-gonic/gin"
-	requestdto "github.com/lppduy/ecom-poc/services/order/internal/api/dto/request"
+	"github.com/lppduy/ecom-poc/pkg/jwtutil"
 	responsedto "github.com/lppduy/ecom-poc/services/order/internal/api/dto/response"
 	"github.com/lppduy/ecom-poc/services/order/internal/api/httpx"
 	"github.com/lppduy/ecom-poc/services/order/internal/domain"
@@ -24,13 +24,9 @@ func (c *OrderController) Health(ctx *gin.Context) {
 }
 
 func (c *OrderController) CreateOrder(ctx *gin.Context) {
-	var req requestdto.CreateOrderRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		httpx.BadRequest(ctx, "invalid json")
-		return
-	}
-	if req.UserID == "" {
-		httpx.BadRequest(ctx, "userId is required")
+	userID := jwtutil.GetUserID(ctx)
+	if userID == "" {
+		httpx.BadRequest(ctx, "unauthenticated")
 		return
 	}
 
@@ -40,7 +36,7 @@ func (c *OrderController) CreateOrder(ctx *gin.Context) {
 		return
 	}
 
-	created, existed, err := c.service.CreateOrder(ctx.Request.Context(), req.UserID, idempotencyKey)
+	created, existed, err := c.service.CreateOrder(ctx.Request.Context(), userID, idempotencyKey)
 	if err != nil {
 		if errors.Is(err, domain.ErrEmptyCart) {
 			httpx.BadRequest(ctx, "cart is empty")

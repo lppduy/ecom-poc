@@ -9,6 +9,7 @@ type Config struct {
 	Port          string
 	DefaultUserID string
 	RedisAddr     string
+	JWTSecret     string
 }
 
 func Load() Config {
@@ -16,6 +17,7 @@ func Load() Config {
 		Port:          getEnv("PORT", "8082"),
 		DefaultUserID: getEnv("DEFAULT_USER_ID", "u_001"),
 		RedisAddr:     getEnv("REDIS_ADDR", "localhost:6379"),
+		JWTSecret:     getEnv("JWT_SECRET", "supersecret-change-in-prod"),
 	}
 }
 

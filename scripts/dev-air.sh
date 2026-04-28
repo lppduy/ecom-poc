@@ -12,6 +12,7 @@ fi
 
 cleanup() {
   trap - INT TERM EXIT
+  if [[ -n "${AUTH_PID:-}" ]]; then kill "$AUTH_PID" 2>/dev/null || true; fi
   if [[ -n "${CATALOG_PID:-}" ]]; then kill "$CATALOG_PID" 2>/dev/null || true; fi
   if [[ -n "${CART_PID:-}" ]]; then kill "$CART_PID" 2>/dev/null || true; fi
   if [[ -n "${ORDER_PID:-}" ]]; then kill "$ORDER_PID" 2>/dev/null || true; fi
@@ -19,6 +20,12 @@ cleanup() {
   if [[ -n "${SEARCH_PID:-}" ]]; then kill "$SEARCH_PID" 2>/dev/null || true; fi
 }
 trap cleanup INT TERM EXIT
+
+(
+  cd "$ROOT_DIR/services/auth"
+  "$AIR_BIN"
+) &
+AUTH_PID=$!
 
 (
   cd "$ROOT_DIR/services/catalog"
@@ -51,6 +58,7 @@ INVENTORY_PID=$!
 SEARCH_PID=$!
 
 echo "Air dev servers running:"
+echo "  auth:      http://localhost:8087"
 echo "  catalog:   http://localhost:8081"
 echo "  cart:      http://localhost:8082"
 echo "  order:     http://localhost:8083"

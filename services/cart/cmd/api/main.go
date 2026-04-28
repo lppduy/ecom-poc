@@ -23,10 +23,10 @@ func main() {
 
 	repo := repository.NewRedisCartRepository(redisClient)
 	cartService := service.NewCartService(repo)
-	cartController := controller.NewCartController(cartService, cfg.DefaultUserID)
+	cartController := controller.NewCartController(cartService)
 
 	router := gin.Default()
-	cartController.RegisterRoutes(router)
+	cartController.RegisterRoutes(router, cfg.JWTSecret)
 
 	addr := ":" + cfg.Port
 	fmt.Printf("service started on %s\n", addr)

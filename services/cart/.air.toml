@@ -4,7 +4,7 @@ tmp_dir = "tmp"
 [build]
 cmd = "go build -o ./tmp/main ./cmd/api/main.go"
 entrypoint = "./tmp/main"
-full_bin = "PORT=8082 REDIS_ADDR=localhost:6379 ./tmp/main"
+full_bin = "PORT=8082 REDIS_ADDR=localhost:6379 JWT_SECRET=supersecret-change-in-prod ./tmp/main"
 include_ext = ["go"]
 exclude_dir = ["tmp"]
 delay = 300

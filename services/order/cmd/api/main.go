@@ -41,7 +41,7 @@ func main() {
 	orderController := controller.NewOrderController(orderService)
 
 	router := gin.Default()
-	routes.RegisterOrderRoutes(router, orderController)
+	routes.RegisterOrderRoutes(router, orderController, cfg.JWTSecret)
 
 	addr := ":" + cfg.Port
 	fmt.Printf("service started on %s\n", addr)
