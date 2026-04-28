@@ -4,7 +4,7 @@ tmp_dir = "tmp"
 [build]
 cmd = "go build -o ./tmp/main ./cmd/api/main.go"
 entrypoint = "./tmp/main"
-full_bin = "PORT=8085 ES_ADDRESS=http://localhost:9200 CATALOG_BASE_URL=http://localhost:8081 ./tmp/main"
+full_bin = "PORT=8085 ES_ADDRESS=http://localhost:9200 CATALOG_GRPC_ADDR=localhost:9081 ./tmp/main"
 include_ext = ["go"]
 exclude_dir = ["tmp"]
 delay = 300

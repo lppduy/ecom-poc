@@ -24,7 +24,6 @@ func main() {
 		log.Fatalf("failed to create ES client: %v", err)
 	}
 
-	// Verify ES is reachable.
 	res, err := esClient.Info()
 	if err != nil {
 		log.Fatalf("failed to connect to Elasticsearch: %v", err)
@@ -35,11 +34,17 @@ func main() {
 	}
 	log.Printf("connected to Elasticsearch at %s", cfg.ESAddress)
 
+	// gRPC streaming client — receives products from catalog one-by-one via stream
+	catalogClient, err := client.NewCatalogGRPCClient(cfg.CatalogGRPCAddr)
+	if err != nil {
+		log.Fatalf("search: connect catalog gRPC: %v", err)
+	}
+	defer catalogClient.Close()
+
 	repo := repository.NewESSearchRepository(esClient)
 	searchService := service.NewSearchService(repo)
-	catalogClient := client.NewCatalogHTTPClient(cfg.CatalogBaseURL)
 
-	// Reindex products from catalog on startup (best-effort).
+	// Reindex products from catalog on startup via gRPC stream (best-effort)
 	go func() {
 		products, err := catalogClient.FetchAllProducts()
 		if err != nil {
@@ -50,7 +55,7 @@ func main() {
 			log.Printf("warn: startup bulk index failed: %v", err)
 			return
 		}
-		log.Printf("indexed %d products from catalog on startup", len(products))
+		log.Printf("indexed %d products from catalog via gRPC stream on startup", len(products))
 	}()
 
 	searchController := controller.NewSearchController(searchService, catalogClient)

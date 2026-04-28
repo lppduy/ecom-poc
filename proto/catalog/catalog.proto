@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package catalog;
+
+option go_package = "github.com/lppduy/ecom-poc/gen/catalog";
+
+service CatalogService {
+  // StreamProducts streams all products one-by-one from catalog to the caller.
+  // Server-side streaming RPC: catalog sends N messages, client reads until EOF.
+  rpc StreamProducts(StreamProductsRequest) returns (stream Product);
+}
+
+message StreamProductsRequest {}
+
+message Product {
+  string id    = 1;
+  string name  = 2;
+  int32  price = 3;
+}

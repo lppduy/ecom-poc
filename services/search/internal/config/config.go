@@ -6,16 +6,16 @@ import (
 )
 
 type Config struct {
-	Port          string
-	ESAddress     string
-	CatalogBaseURL string
+	Port             string
+	ESAddress        string
+	CatalogGRPCAddr  string
 }
 
 func Load() Config {
 	return Config{
-		Port:           getEnv("PORT", "8085"),
-		ESAddress:      getEnv("ES_ADDRESS", "http://localhost:9200"),
-		CatalogBaseURL: getEnv("CATALOG_BASE_URL", "http://localhost:8081"),
+		Port:            getEnv("PORT", "8085"),
+		ESAddress:       getEnv("ES_ADDRESS", "http://localhost:9200"),
+		CatalogGRPCAddr: getEnv("CATALOG_GRPC_ADDR", "localhost:9081"),
 	}
 }
 
