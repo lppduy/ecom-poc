@@ -35,7 +35,7 @@ func (s *DefaultOrderService) CreateOrder(ctx context.Context, userID, idempoten
 		return existing, true, nil
 	}
 
-	cartItems, err := s.cartClient.FetchCartItems(userID)
+	cartItems, err := s.cartClient.FetchCartItems(ctx, userID)
 	if err != nil {
 		return domain.Order{}, false, err
 	}
@@ -60,7 +60,7 @@ func (s *DefaultOrderService) CreateOrder(ctx context.Context, userID, idempoten
 		return domain.Order{}, false, fmt.Errorf("stock reservation failed: %w", err)
 	}
 
-	_ = s.cartClient.ClearCart(userID)
+	_ = s.cartClient.ClearCart(ctx, userID)
 	return created, false, nil
 }
 

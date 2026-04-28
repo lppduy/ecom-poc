@@ -1,8 +1,12 @@
 package client
 
-import "github.com/lppduy/ecom-poc/services/order/internal/domain"
+import (
+	"context"
+
+	"github.com/lppduy/ecom-poc/services/order/internal/domain"
+)
 
 type CartClient interface {
-	FetchCartItems(userID string) ([]domain.OrderItem, error)
-	ClearCart(userID string) error
+	FetchCartItems(ctx context.Context, userID string) ([]domain.OrderItem, error)
+	ClearCart(ctx context.Context, userID string) error
 }

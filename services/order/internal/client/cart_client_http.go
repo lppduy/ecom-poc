@@ -1,11 +1,12 @@
 package client
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
 
+	"github.com/lppduy/ecom-poc/pkg/jwtutil"
 	"github.com/lppduy/ecom-poc/services/order/internal/domain"
 )
 
@@ -17,12 +18,16 @@ func NewCartHTTPClient(baseURL string) *CartHTTPClient {
 	return &CartHTTPClient{baseURL: baseURL}
 }
 
-func (c *CartHTTPClient) FetchCartItems(userID string) ([]domain.OrderItem, error) {
-	req, err := http.NewRequest(http.MethodGet, c.baseURL+"/cart?userId="+url.QueryEscape(userID), nil)
+func (c *CartHTTPClient) FetchCartItems(ctx context.Context, userID string) ([]domain.OrderItem, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL+"/cart", nil)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("X-User-Id", userID)
+	// Forward the user's JWT so cart service authenticates and resolves userID on its own.
+	// The token already encodes userID — no need to pass it as a query param.
+	if token := jwtutil.TokenFromContext(ctx); token != "" {
+		req.Header.Set("Authorization", "Bearer "+token)
+	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -46,19 +51,20 @@ func (c *CartHTTPClient) FetchCartItems(userID string) ([]domain.OrderItem, erro
 	return payload.Items, nil
 }
 
-func (c *CartHTTPClient) ClearCart(userID string) error {
-	req, err := http.NewRequest(http.MethodPost, c.baseURL+"/cart/clear", nil)
+func (c *CartHTTPClient) ClearCart(ctx context.Context, userID string) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+"/cart/clear", nil)
 	if err != nil {
 		return err
 	}
-	req.Header.Set("X-User-Id", userID)
+	if token := jwtutil.TokenFromContext(ctx); token != "" {
+		req.Header.Set("Authorization", "Bearer "+token)
+	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
-
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("cart clear failed with status %d", resp.StatusCode)
 	}

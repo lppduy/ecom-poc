@@ -1,6 +1,7 @@
 package jwtutil
 
 import (
+	"context"
 	"net/http"
 	"strings"
 
@@ -9,8 +10,12 @@ import (
 
 const ContextKeyUserID = "userID"
 
+type contextKey string
+
+const contextKeyToken contextKey = "authToken"
+
 // RequireAuth extracts and validates JWT from Authorization: Bearer <token>.
-// Sets userID in gin context on success.
+// Sets userID in gin context and stores raw token in request context for forwarding.
 func RequireAuth(secret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		header := c.GetHeader("Authorization")
@@ -25,6 +30,9 @@ func RequireAuth(secret string) gin.HandlerFunc {
 			return
 		}
 		c.Set(ContextKeyUserID, claims.UserID)
+		// Store raw token in request context so downstream service clients can forward it
+		ctx := context.WithValue(c.Request.Context(), contextKeyToken, tokenStr)
+		c.Request = c.Request.WithContext(ctx)
 		c.Next()
 	}
 }
@@ -36,4 +44,11 @@ func GetUserID(c *gin.Context) string {
 		return s
 	}
 	return ""
+}
+
+// TokenFromContext retrieves the raw JWT token from a stdlib context.
+// Used by HTTP clients to forward the token to downstream services.
+func TokenFromContext(ctx context.Context) string {
+	t, _ := ctx.Value(contextKeyToken).(string)
+	return t
 }

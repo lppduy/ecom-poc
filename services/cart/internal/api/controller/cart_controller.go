@@ -26,6 +26,7 @@ func (c *CartController) RegisterRoutes(router *gin.Engine, jwtSecret string) {
 		protected.POST("/cart/items", c.addCartItem)
 		protected.POST("/cart/clear", c.clearCart)
 	}
+
 }
 
 type addCartItemRequest struct {
@@ -81,3 +82,4 @@ func (c *CartController) clearCart(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "cart cleared"})
 }
+
