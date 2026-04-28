@@ -6,13 +6,14 @@ import (
 )
 
 type Config struct {
-	Port             string
-	DatabaseURL      string
-	CartBaseURL      string
-	InventoryBaseURL string
-	KafkaBrokers     string
-	JWTSecret        string
-	RedisAddr        string
+	Port              string
+	DatabaseURL       string
+	CartBaseURL       string
+	InventoryBaseURL  string
+	InventoryGRPCAddr string
+	KafkaBrokers      string
+	JWTSecret         string
+	RedisAddr         string
 }
 
 func Load() Config {
@@ -20,7 +21,8 @@ func Load() Config {
 		Port:             getEnv("PORT", "8080"),
 		DatabaseURL:      getEnv("DATABASE_URL", "postgres://ecom:ecom@localhost:5432/ecom?sslmode=disable"),
 		CartBaseURL:      getEnv("CART_BASE_URL", "http://localhost:8082"),
-		InventoryBaseURL: getEnv("INVENTORY_BASE_URL", "http://localhost:8084"),
+		InventoryBaseURL:  getEnv("INVENTORY_BASE_URL", "http://localhost:8084"),
+		InventoryGRPCAddr: getEnv("INVENTORY_GRPC_ADDR", "localhost:9084"),
 		KafkaBrokers:     getEnv("KAFKA_BROKERS", "localhost:9092"),
 		JWTSecret:        getEnv("JWT_SECRET", "supersecret-change-in-prod"),
 		RedisAddr:        getEnv("REDIS_ADDR", "localhost:6379"),

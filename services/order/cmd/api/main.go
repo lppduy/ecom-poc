@@ -37,7 +37,11 @@ func main() {
 
 	repo := repository.NewOrderRepository(db)
 	cartClient := client.NewCartHTTPClient(cfg.CartBaseURL)
-	inventoryClient := client.NewInventoryHTTPClient(cfg.InventoryBaseURL)
+	inventoryClient, err := client.NewInventoryGRPCClient(cfg.InventoryGRPCAddr)
+	if err != nil {
+		log.Fatalf("order: connect inventory gRPC: %v", err)
+	}
+	defer inventoryClient.Close()
 	orderService := service.NewOrderService(repo, cartClient, inventoryClient)
 	rdb := redis.NewClient(&redis.Options{Addr: cfg.RedisAddr})
 	if err := rdb.Ping(context.Background()).Err(); err != nil {

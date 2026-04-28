@@ -4,12 +4,17 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
+	"google.golang.org/grpc"
+
+	inventorypb "github.com/lppduy/ecom-poc/gen/inventory"
 	"github.com/lppduy/ecom-poc/services/inventory/internal/api/controller"
 	"github.com/lppduy/ecom-poc/services/inventory/internal/api/routes"
 	"github.com/lppduy/ecom-poc/services/inventory/internal/config"
+	inventorygrpc "github.com/lppduy/ecom-poc/services/inventory/internal/grpc"
 	"github.com/lppduy/ecom-poc/services/inventory/internal/repository"
 	"github.com/lppduy/ecom-poc/services/inventory/internal/service"
 )
@@ -39,11 +44,26 @@ func main() {
 	inventoryService := service.NewInventoryService(repo)
 	inventoryController := controller.NewInventoryController(inventoryService, flashSaleRepo)
 
+	// gRPC server (port 9084) for internal service-to-service calls
+	go func() {
+		lis, err := net.Listen("tcp", ":"+cfg.GRPCPort)
+		if err != nil {
+			log.Fatalf("inventory: grpc listen: %v", err)
+		}
+		grpcServer := grpc.NewServer()
+		inventorypb.RegisterInventoryServiceServer(grpcServer, inventorygrpc.NewInventoryServer(inventoryService))
+		log.Printf("inventory gRPC server listening on :%s", cfg.GRPCPort)
+		if err := grpcServer.Serve(lis); err != nil {
+			log.Fatalf("inventory: grpc serve: %v", err)
+		}
+	}()
+
+	// HTTP server (port 8084) for external/admin endpoints
 	router := gin.Default()
 	routes.Register(router, inventoryController)
 
 	addr := ":" + cfg.Port
-	fmt.Printf("service started on %s\n", addr)
+	fmt.Printf("inventory HTTP server listening on %s\n", addr)
 	if err := router.Run(addr); err != nil {
 		log.Fatalf("server failed: %v", err)
 	}

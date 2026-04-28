@@ -7,6 +7,7 @@ import (
 
 type Config struct {
 	Port        string
+	GRPCPort    string
 	DatabaseURL string
 	RedisAddr   string
 }
@@ -14,6 +15,7 @@ type Config struct {
 func Load() Config {
 	return Config{
 		Port:        getEnv("PORT", "8084"),
+		GRPCPort:    getEnv("GRPC_PORT", "9084"),
 		DatabaseURL: getEnv("DATABASE_URL", "postgres://ecom:ecom@localhost:5432/ecom?sslmode=disable"),
 		RedisAddr:   getEnv("REDIS_ADDR", "localhost:6379"),
 	}
