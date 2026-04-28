@@ -18,7 +18,7 @@ type Config struct {
 
 func Load() Config {
 	return Config{
-		Port:             getEnv("PORT", "8080"),
+		Port:             getEnv("PORT", "8083"),
 		DatabaseURL:      getEnv("DATABASE_URL", "postgres://ecom:ecom@localhost:5432/ecom?sslmode=disable"),
 		CartBaseURL:      getEnv("CART_BASE_URL", "http://localhost:8082"),
 		InventoryBaseURL:  getEnv("INVENTORY_BASE_URL", "http://localhost:8084"),
