@@ -20,13 +20,18 @@ type paymentEvent struct {
 // StartPaymentConsumer subscribes to "payment.events" and drives the order
 // state machine (PENDING -> CONFIRMED or FAILED) based on payment outcome.
 // Runs as a background goroutine until ctx is cancelled.
+//
+// Uses a simple partition reader (no GroupID) starting from the beginning of
+// the topic. On restart the consumer re-reads all historical events; the order
+// state machine safely rejects duplicate transitions (ErrInvalidTransition).
 func StartPaymentConsumer(ctx context.Context, brokers []string, orderSvc service.OrderService) {
 	r := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:  brokers,
-		Topic:    paymentEventsTopic,
-		GroupID:  "order-payment-consumer",
-		MinBytes: 1,
-		MaxBytes: 10e6,
+		Brokers:     brokers,
+		Topic:       paymentEventsTopic,
+		Partition:   0,
+		StartOffset: kafka.FirstOffset,
+		MinBytes:    1,
+		MaxBytes:    10e6,
 	})
 
 	go func() {

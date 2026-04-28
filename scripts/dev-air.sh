@@ -65,13 +65,13 @@ SEARCH_PID=$!
 PAYMENT_PID=$!
 
 echo "Air dev servers running:"
-echo "  auth:      http://localhost:8087"
+echo "  auth:      http://localhost:8086"
 echo "  catalog:   http://localhost:8081"
 echo "  cart:      http://localhost:8082"
 echo "  order:     http://localhost:8083"
 echo "  inventory: http://localhost:8084"
 echo "  search:    http://localhost:8085"
-echo "  payment:   http://localhost:8086"
+echo "  payment:   http://localhost:8087"
 echo ""
 echo "Press Ctrl+C to stop all."
 
