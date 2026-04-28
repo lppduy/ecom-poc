@@ -1,4 +1,4 @@
-package httpx
+package response
 
 import (
 	"net/http"
@@ -10,20 +10,8 @@ func OK(c *gin.Context, data any) {
 	c.JSON(http.StatusOK, data)
 }
 
-func Created(c *gin.Context, data any) {
-	c.JSON(http.StatusCreated, data)
-}
-
 func BadRequest(c *gin.Context, msg string) {
 	c.JSON(http.StatusBadRequest, gin.H{"error": msg})
-}
-
-func Unauthorized(c *gin.Context, msg string) {
-	c.JSON(http.StatusUnauthorized, gin.H{"error": msg})
-}
-
-func Conflict(c *gin.Context, msg string) {
-	c.JSON(http.StatusConflict, gin.H{"error": msg})
 }
 
 func InternalError(c *gin.Context, msg string) {

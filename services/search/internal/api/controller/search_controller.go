@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lppduy/ecom-poc/services/search/internal/api/httpx"
+	"github.com/lppduy/ecom-poc/services/search/internal/api/response"
 	"github.com/lppduy/ecom-poc/services/search/internal/client"
 	"github.com/lppduy/ecom-poc/services/search/internal/domain"
 	"github.com/lppduy/ecom-poc/services/search/internal/service"
@@ -32,41 +32,41 @@ func (ctrl *SearchController) Search(c *gin.Context) {
 
 	result, err := ctrl.service.Search(q, minPrice, maxPrice)
 	if err != nil {
-		httpx.InternalError(c, "search failed")
+		response.InternalError(c, "search failed")
 		return
 	}
 
-	httpx.OK(c, result)
+	response.OK(c, result)
 }
 
 // POST /search/reindex — pulls all products from catalog and re-indexes into ES
 func (ctrl *SearchController) Reindex(c *gin.Context) {
 	products, err := ctrl.catalogClient.FetchAllProducts()
 	if err != nil {
-		httpx.InternalError(c, "failed to fetch products from catalog")
+		response.InternalError(c, "failed to fetch products from catalog")
 		return
 	}
 
 	if err := ctrl.service.BulkIndex(products); err != nil {
-		httpx.InternalError(c, "bulk index failed")
+		response.InternalError(c, "bulk index failed")
 		return
 	}
 
-	httpx.OK(c, gin.H{"indexed": len(products)})
+	response.OK(c, gin.H{"indexed": len(products)})
 }
 
 // POST /search/index — index a single product (called manually or by catalog event)
 func (ctrl *SearchController) IndexOne(c *gin.Context) {
 	var p domain.Product
 	if err := c.ShouldBindJSON(&p); err != nil {
-		httpx.BadRequest(c, "invalid json")
+		response.BadRequest(c, "invalid json")
 		return
 	}
 	if err := ctrl.service.IndexProduct(p); err != nil {
-		httpx.InternalError(c, "index failed")
+		response.InternalError(c, "index failed")
 		return
 	}
-	httpx.OK(c, gin.H{"message": "indexed"})
+	response.OK(c, gin.H{"message": "indexed"})
 }
 
 func queryInt(c *gin.Context, key string) int {

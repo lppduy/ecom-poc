@@ -140,6 +140,6 @@ internal/
   service/      business logic
   client/       inter-service HTTP / gRPC clients
   grpc/         gRPC server implementation
-  api/          controller, routes, dto, httpx
+  api/          controller, routes, dto, response
   config/       env-based config
 ```

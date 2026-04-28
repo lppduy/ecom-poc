@@ -30,7 +30,7 @@ internal/
     controller/   Gin request handlers
     routes/       route registration
     dto/          request + response types
-    httpx/        response helpers (OK, BadRequest, etc.)
+    response/        response helpers (OK, BadRequest, etc.)
   event/          Kafka publisher, consumer, relay (order, payment only)
   config/         env-based config with defaults
 pkg/

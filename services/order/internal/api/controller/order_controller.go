@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/lppduy/ecom-poc/pkg/jwtutil"
 	responsedto "github.com/lppduy/ecom-poc/services/order/internal/api/dto/response"
-	"github.com/lppduy/ecom-poc/services/order/internal/api/httpx"
+	"github.com/lppduy/ecom-poc/services/order/internal/api/response"
 	"github.com/lppduy/ecom-poc/services/order/internal/domain"
 	"github.com/lppduy/ecom-poc/services/order/internal/service"
 )
@@ -20,56 +20,56 @@ func NewOrderController(service service.OrderService) *OrderController {
 }
 
 func (c *OrderController) Health(ctx *gin.Context) {
-	httpx.OK(ctx, gin.H{"status": "ok"})
+	response.OK(ctx, gin.H{"status": "ok"})
 }
 
 func (c *OrderController) CreateOrder(ctx *gin.Context) {
 	userID := jwtutil.GetUserID(ctx)
 	if userID == "" {
-		httpx.BadRequest(ctx, "unauthenticated")
+		response.BadRequest(ctx, "unauthenticated")
 		return
 	}
 
 	idempotencyKey := ctx.GetHeader("Idempotency-Key")
 	if idempotencyKey == "" {
-		httpx.BadRequest(ctx, "Idempotency-Key header is required")
+		response.BadRequest(ctx, "Idempotency-Key header is required")
 		return
 	}
 
 	created, existed, err := c.service.CreateOrder(ctx.Request.Context(), userID, idempotencyKey)
 	if err != nil {
 		if errors.Is(err, domain.ErrEmptyCart) {
-			httpx.BadRequest(ctx, "cart is empty")
+			response.BadRequest(ctx, "cart is empty")
 			return
 		}
-		httpx.InternalError(ctx, "failed to create order")
+		response.InternalError(ctx, "failed to create order")
 		return
 	}
 
 	resp := responsedto.FromDomain(created)
 	if existed {
-		httpx.OK(ctx, resp)
+		response.OK(ctx, resp)
 		return
 	}
-	httpx.Created(ctx, resp)
+	response.Created(ctx, resp)
 }
 
 func (c *OrderController) GetOrder(ctx *gin.Context) {
 	id := ctx.Param("id")
 	if id == "" {
-		httpx.BadRequest(ctx, "order id is required")
+		response.BadRequest(ctx, "order id is required")
 		return
 	}
 
 	found, ok, err := c.service.GetOrder(id)
 	if err != nil {
-		httpx.InternalError(ctx, "failed to query order")
+		response.InternalError(ctx, "failed to query order")
 		return
 	}
 	if !ok {
-		httpx.NotFound(ctx, "order not found")
+		response.NotFound(ctx, "order not found")
 		return
 	}
 
-	httpx.OK(ctx, responsedto.FromDomain(found))
+	response.OK(ctx, responsedto.FromDomain(found))
 }
