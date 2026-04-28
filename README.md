@@ -1,6 +1,6 @@
 # ecom-poc (Go)
 
-Hands-on e-commerce system built with Go — focused on production-minded patterns: outbox, state machine, inter-service HTTP, Redis, Kafka, Elasticsearch.
+Hands-on e-commerce system built with Go, focused on production-minded patterns: outbox, state machine, inter-service HTTP, Redis, Kafka, Elasticsearch.
 
 ## Services
 
@@ -14,12 +14,12 @@ Hands-on e-commerce system built with Go — focused on production-minded patter
 
 ## Architecture Highlights
 
-- **Outbox pattern** — order events written to DB in same transaction, relayed to Kafka every 3s
-- **State machine** — `PENDING → CONFIRMED / FAILED`, enforced at domain layer
-- **Idempotency** — `Idempotency-Key` header prevents duplicate orders on retry
-- **SELECT FOR UPDATE** — prevents oversell when multiple orders reserve same stock
-- **Redis Hash** — cart stored as `cart:{userId}` Hash with 24h TTL
-- **Elasticsearch** — fuzzy full-text search with price range filter, auto-indexed from catalog on startup
+- **Outbox pattern**: order events written to DB in same transaction, relayed to Kafka every 3s
+- **State machine**: `PENDING -> CONFIRMED / FAILED`, enforced at domain layer
+- **Idempotency**: `Idempotency-Key` header prevents duplicate orders on retry
+- **SELECT FOR UPDATE**: prevents oversell when multiple orders reserve same stock
+- **Redis Hash**: cart stored as `cart:{userId}` Hash with 24h TTL
+- **Elasticsearch**: fuzzy full-text search with price range filter, auto-indexed from catalog on startup
 
 ## Infrastructure
 

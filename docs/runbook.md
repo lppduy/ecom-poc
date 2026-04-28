@@ -5,7 +5,7 @@
 ```bash
 cd infra
 docker compose up -d
-docker compose ps   # all services should be healthy
+docker compose ps
 ```
 
 Services started: `postgres`, `redis`, `kafka`, `kafka-ui`, `elasticsearch`
@@ -14,13 +14,13 @@ Services started: `postgres`, `redis`, `kafka`, `kafka-ui`, `elasticsearch`
 
 ## Run Services
 
-**All services with hot-reload (Air):**
+All services with hot-reload (Air):
 
 ```bash
 ./scripts/dev-air.sh
 ```
 
-**Or individually:**
+Or individually:
 
 ```bash
 cd services/catalog   && PORT=8081 go run ./cmd/api/main.go
@@ -65,7 +65,7 @@ curl -X POST http://localhost:8083/orders \
   -d '{"userId":"u_001"}'
 ```
 
-> Saves orderId from response for next steps.
+Save the `id` from the response for next steps.
 
 ### 4. Confirm or fail the order
 
@@ -78,15 +78,16 @@ curl -X PATCH http://localhost:8083/orders/{id}/fail
 
 ```bash
 curl -s http://localhost:8084/inventory/stock/sku_iphone_15_128 | jq
-# → { quantity, reserved, available }
 ```
+
+Returns `quantity`, `reserved`, `available`.
 
 ### 6. Search products
 
 ```bash
 curl "http://localhost:8085/search?q=iphone"
 curl "http://localhost:8085/search?q=airpods&maxPrice=7000000"
-curl "http://localhost:8085/search?q=iphoen"   # fuzzy match
+curl "http://localhost:8085/search?q=iphoen"
 ```
 
 ### 7. Reindex search (sync from catalog)
@@ -109,8 +110,8 @@ Runs assertions covering the full checkout flow end-to-end.
 |---------|-----|
 | Port conflict | Change `PORT` in `.air.toml` for that service |
 | Docker not running | Start Docker Desktop before `docker compose up` |
-| Kafka UI empty | `docker compose ps` — check broker health |
+| Kafka UI empty | `docker compose ps` - check broker health |
 | `cart is empty` on create order | Add item via `POST /cart/items` first |
 | `Idempotency-Key header is required` | Include `-H "Idempotency-Key: <unique>"` |
 | ES search returns empty | Call `POST /search/reindex` to index products |
-| ES not ready | Wait ~40s after `docker compose up`, check `GET localhost:9200/_cluster/health` |
+| ES not ready | Wait ~40s, check `GET localhost:9200/_cluster/health` |
